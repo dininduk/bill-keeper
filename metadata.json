@@ -1,0 +1,5 @@
+{
+  "name": "Bill Keeper",
+  "description": "A production-ready bill management and splitting application with LKR currency support, PDF reports, and automated emailing via Cloudflare Pages Functions.",
+  "requestFramePermissions": []
+}
