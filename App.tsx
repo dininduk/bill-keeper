@@ -625,13 +625,13 @@ const App: React.FC = () => {
               </div>
               <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl flex justify-between items-center mt-2">
                 <span className="text-sm font-bold text-slate-900 dark:text-slate-100">Contributed Amount</span>
-                <span className="text-lg font-bold text-emerald-600">{formatLKR(viewingSummary.participant.contributedAmount || 0)}</span>
+                <span className="text-lg font-bold text-slate-700 dark:text-slate-300">{formatLKR(viewingSummary.participant.contributedAmount || 0)}</span>
               </div>
-              <div className={`p-4 rounded-xl flex justify-between items-center mt-2 ${viewingSummary.balance < 0 ? 'bg-emerald-50 dark:bg-emerald-900/20' : viewingSummary.balance === 0 ? 'bg-slate-100 dark:bg-slate-800' : 'bg-rose-50 dark:bg-rose-900/20'}`}>
-                <span className={`text-lg font-bold ${viewingSummary.balance < 0 ? 'text-emerald-700 dark:text-emerald-400' : viewingSummary.balance === 0 ? 'text-slate-600 dark:text-slate-400' : 'text-rose-700 dark:text-rose-400'}`}>
+              <div className={`p-4 rounded-xl flex justify-between items-center mt-2 ${viewingSummary.balance < 0 ? 'bg-indigo-50 dark:bg-indigo-900/20' : viewingSummary.balance === 0 ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-rose-50 dark:bg-rose-900/20'}`}>
+                <span className={`text-lg font-bold ${viewingSummary.balance < 0 ? 'text-indigo-700 dark:text-indigo-400' : viewingSummary.balance === 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
                    {viewingSummary.balance < 0 ? 'Overpaid By' : viewingSummary.balance === 0 ? 'Status' : 'Balance Due'}
                 </span>
-                <span className={`text-2xl font-black ${viewingSummary.balance < 0 ? 'text-emerald-600' : viewingSummary.balance === 0 ? 'text-slate-500' : 'text-rose-600'}`}>
+                <span className={`text-2xl font-black ${viewingSummary.balance < 0 ? 'text-indigo-600' : viewingSummary.balance === 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                    {viewingSummary.balance === 0 ? 'Settled' : formatLKR(Math.abs(viewingSummary.balance))}
                 </span>
               </div>

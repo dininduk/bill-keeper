@@ -10,8 +10,9 @@ export async function onRequestPost(context) {
   }
 
   try {
-    const { report, billDate, billTitle } = await request.json();
-    const { participant, assignedItems, totalAmount } = report;
+    const { report, billDate, billTitle, billTotal, billContributed, billRemaining } = await request.json();
+    const { participant, assignedItems, totalAmount, balance } = report;
+    const contributedAmount = participant.contributedAmount || 0;
 
     if (!participant.email) {
       return new Response(JSON.stringify({ error: "Recipient email is missing." }), { status: 400 });
@@ -48,13 +49,46 @@ export async function onRequestPost(context) {
           </tbody>
           <tfoot>
             <tr>
-              <td style="padding-top: 20px; font-size: 18px; font-weight: bold; color: #1e293b;">Total Payable</td>
-              <td style="padding-top: 20px; text-align: right; font-size: 20px; font-weight: 900; color: #0284c7;">
+              <td style="padding-top: 20px; font-size: 14px; font-weight: bold; color: #1e293b;">Total Share</td>
+              <td style="padding-top: 20px; text-align: right; font-size: 16px; font-weight: bold; color: #0284c7;">
                 LKR ${totalAmount.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-top: 10px; font-size: 14px; font-weight: bold; color: #1e293b;">Contributed Amount</td>
+              <td style="padding-top: 10px; text-align: right; font-size: 16px; font-weight: bold; color: #10b981;">
+                LKR ${contributedAmount.toLocaleString('en-LK', { minimumFractionDigits: 2 })}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding-top: 20px; font-size: 16px; font-weight: 900; color: #1e293b;">
+                ${balance < 0 ? 'Overpaid By' : balance === 0 ? 'Status' : 'Balance Due'}
+              </td>
+              <td style="padding-top: 20px; text-align: right; font-size: 20px; font-weight: 900; color: ${balance < 0 ? '#10b981' : balance === 0 ? '#64748b' : '#ef4444'};">
+                ${balance === 0 ? 'Settled' : `LKR ${Math.abs(balance).toLocaleString('en-LK', { minimumFractionDigits: 2 })}`}
               </td>
             </tr>
           </tfoot>
         </table>
+
+        <!-- Summary Section -->
+        <div style="margin-top: 30px; padding: 20px; background-color: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <h3 style="margin-top: 0; margin-bottom: 15px; color: #334155; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;">Overall Bill Summary</h3>
+          <div style="display: table; width: 100%;">
+            <div style="display: table-row;">
+              <div style="display: table-cell; padding-bottom: 10px; color: #475569; font-size: 14px;">Total Bill Amount</div>
+              <div style="display: table-cell; padding-bottom: 10px; text-align: right; color: #0f172a; font-size: 14px; font-weight: bold;">LKR ${(billTotal || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}</div>
+            </div>
+            <div style="display: table-row;">
+              <div style="display: table-cell; padding-bottom: 10px; color: #475569; font-size: 14px;">Total Paid</div>
+              <div style="display: table-cell; padding-bottom: 10px; text-align: right; color: #10b981; font-size: 14px; font-weight: bold;">LKR ${(billContributed || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}</div>
+            </div>
+            <div style="display: table-row;">
+              <div style="display: table-cell; padding-top: 10px; border-top: 1px solid #cbd5e1; color: #475569; font-size: 14px; font-weight: bold;">Remaining Balance</div>
+              <div style="display: table-cell; padding-top: 10px; border-top: 1px solid #cbd5e1; text-align: right; color: #ef4444; font-size: 14px; font-weight: bold;">LKR ${(billRemaining || 0).toLocaleString('en-LK', { minimumFractionDigits: 2 })}</div>
+            </div>
+          </div>
+        </div>
 
         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9; text-align: center;">
           <p style="font-size: 12px; color: #94a3b8;">Sent via Bill Keeper – LKR</p>

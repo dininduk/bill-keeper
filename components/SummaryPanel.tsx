@@ -71,13 +71,13 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({ bill, onViewReport, 
                   <div className="text-right">
                     {summary.balance < 0 ? (
                       <div>
-                        <p className="text-xs text-emerald-600 uppercase font-bold tracking-wider">Overpaid</p>
-                        <p className="text-xl font-black text-emerald-600">{formatLKR(Math.abs(summary.balance))}</p>
+                        <p className="text-xs text-indigo-600 uppercase font-bold tracking-wider">Overpaid</p>
+                        <p className="text-xl font-black text-indigo-600">{formatLKR(Math.abs(summary.balance))}</p>
                       </div>
                     ) : summary.balance === 0 ? (
                       <div>
-                        <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Settled</p>
-                        <p className="text-xl font-black text-slate-400">-</p>
+                        <p className="text-xs text-emerald-500 uppercase font-bold tracking-wider">Settled</p>
+                        <p className="text-xl font-black text-emerald-500">-</p>
                       </div>
                     ) : (
                       <div>
