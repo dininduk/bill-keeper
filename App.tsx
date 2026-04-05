@@ -33,7 +33,8 @@ const App: React.FC = () => {
   const [emailStatus, setEmailStatus] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null);
 
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
-  const [newParticipant, setNewParticipant] = useState({ name: '', email: '' });
+  const [newParticipant, setNewParticipant] = useState({ name: '', email: '', contributedAmount: '' });
+  const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
 
   const [isAddItemOpen, setIsAddItemOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<BillItem | null>(null);
@@ -102,10 +103,27 @@ const App: React.FC = () => {
     if (!activeBill || !newParticipant.name.trim()) return;
     handleUpdateBill({
       ...activeBill,
-      participants: [...activeBill.participants, { id: generateId(), name: newParticipant.name.trim(), email: newParticipant.email.trim() || undefined }]
+      participants: [...activeBill.participants, { 
+        id: generateId(), 
+        name: newParticipant.name.trim(), 
+        email: newParticipant.email.trim() || undefined,
+        contributedAmount: parseFloat(newParticipant.contributedAmount) || 0
+      }]
     });
-    setNewParticipant({ name: '', email: '' });
+    setNewParticipant({ name: '', email: '', contributedAmount: '' });
     setIsAddParticipantOpen(false);
+  };
+
+  const handleEditParticipantSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeBill || !editingParticipant || !editingParticipant.name.trim()) return;
+    handleUpdateBill({
+      ...activeBill,
+      participants: activeBill.participants.map(p => 
+        p.id === editingParticipant.id ? editingParticipant : p
+      )
+    });
+    setEditingParticipant(null);
   };
 
   const handleRemoveParticipant = (participantId: string) => {
@@ -265,11 +283,16 @@ const App: React.FC = () => {
       doc.setFontSize(12);
       doc.text('Summary of Split:', 14, 70);
       
-      const summaryRows = summaries.map(s => [s.participant.name, s.participant.email || 'N/A', formatLKR(s.totalAmount)]);
+      const getStatusText = (balance: number) => {
+        if (balance < 0) return `Overpaid ${formatLKR(Math.abs(balance))}`;
+        if (balance === 0) return 'Settled';
+        return `Owes ${formatLKR(balance)}`;
+      };
+      const summaryRows = summaries.map(s => [s.participant.name, formatLKR(s.totalAmount), formatLKR(s.participant.contributedAmount || 0), getStatusText(s.balance)]);
       
       autoTable(doc, { 
         startY: 75, 
-        head: [['Name', 'Email', 'Amount Due']], 
+        head: [['Name', 'Share', 'Contributed', 'Status/Balance']], 
         body: summaryRows, 
         theme: 'grid', 
         headStyles: { fillColor: [2, 132, 199] }, 
@@ -355,8 +378,20 @@ const App: React.FC = () => {
                   <div className="flex flex-wrap gap-2">
                     {activeBill.participants.length === 0 && ( <p className="text-slate-400 text-sm italic">Add people to split the bill.</p> )}
                     {activeBill.participants.map(p => (
-                      <div key={p.id} className="inline-flex items-center bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full text-sm group">
+                      <div key={p.id} className="inline-flex items-center bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full text-sm group border border-transparent dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
                         <span className="font-medium mr-2">{p.name}</span>
+                        {(p.contributedAmount || 0) > 0 && (
+                          <span className="text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-1.5 py-0.5 rounded-full mr-2 font-bold select-none cursor-help" title={`Contributed: ${formatLKR(p.contributedAmount!)}`}>
+                            Paid
+                          </span>
+                        )}
+                        <button
+                          onClick={() => setEditingParticipant(p)}
+                          className="text-slate-400 hover:text-blue-500 transition-colors mr-1"
+                          title="Edit Participant"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
                         <button 
                           onClick={() => handleRemoveParticipant(p.id)} 
                           className="text-slate-400 hover:text-red-500 transition-colors"
@@ -456,16 +491,46 @@ const App: React.FC = () => {
           <form onSubmit={handleAddParticipantSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
-              <input autoFocus type="text" required value={newParticipant.name} onChange={e => setNewParticipant({...newParticipant, name: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2" placeholder="John Doe" />
+              <input autoFocus type="text" required value={newParticipant.name} onChange={e => setNewParticipant({...newParticipant, name: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="John Doe" />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email (Optional)</label>
-              <input type="email" value={newParticipant.email} onChange={e => setNewParticipant({...newParticipant, email: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2" placeholder="john@example.com" />
+              <input type="email" value={newParticipant.email} onChange={e => setNewParticipant({...newParticipant, email: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="john@example.com" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contributed Amount (Already paid)</label>
+              <input type="number" step="0.01" min="0" value={newParticipant.contributedAmount} onChange={e => setNewParticipant({...newParticipant, contributedAmount: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="0.00" />
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="secondary" onClick={() => setIsAddParticipantOpen(false)}>Cancel</Button>
               <Button type="submit">Add Participant</Button>
             </div>
+          </form>
+        </Modal>
+
+        {/* Modal: Edit Participant */}
+        <Modal isOpen={!!editingParticipant} onClose={() => setEditingParticipant(null)} title="Edit Participant">
+          <form onSubmit={handleEditParticipantSubmit} className="space-y-4">
+            {editingParticipant && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
+                  <input autoFocus type="text" required value={editingParticipant.name} onChange={e => setEditingParticipant({...editingParticipant, name: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email (Optional)</label>
+                  <input type="email" value={editingParticipant.email || ''} onChange={e => setEditingParticipant({...editingParticipant, email: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contributed Amount (Already paid)</label>
+                  <input type="number" step="0.01" min="0" value={editingParticipant.contributedAmount || ''} onChange={e => setEditingParticipant({...editingParticipant, contributedAmount: parseFloat(e.target.value) || 0})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button type="button" variant="secondary" onClick={() => setEditingParticipant(null)}>Cancel</Button>
+                  <Button type="submit">Save Changes</Button>
+                </div>
+              </>
+            )}
           </form>
         </Modal>
 
@@ -539,8 +604,20 @@ const App: React.FC = () => {
                 ))}
               </div>
               <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl flex justify-between items-center">
-                <span className="text-lg font-bold text-slate-900 dark:text-slate-100">Total Payable</span>
-                <span className="text-2xl font-black text-primary-600">{formatLKR(viewingSummary.totalAmount)}</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">Total Share</span>
+                <span className="text-lg font-bold text-primary-600">{formatLKR(viewingSummary.totalAmount)}</span>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl flex justify-between items-center mt-2">
+                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">Contributed Amount</span>
+                <span className="text-lg font-bold text-emerald-600">{formatLKR(viewingSummary.participant.contributedAmount || 0)}</span>
+              </div>
+              <div className={`p-4 rounded-xl flex justify-between items-center mt-2 ${viewingSummary.balance < 0 ? 'bg-emerald-50 dark:bg-emerald-900/20' : viewingSummary.balance === 0 ? 'bg-slate-100 dark:bg-slate-800' : 'bg-rose-50 dark:bg-rose-900/20'}`}>
+                <span className={`text-lg font-bold ${viewingSummary.balance < 0 ? 'text-emerald-700 dark:text-emerald-400' : viewingSummary.balance === 0 ? 'text-slate-600 dark:text-slate-400' : 'text-rose-700 dark:text-rose-400'}`}>
+                   {viewingSummary.balance < 0 ? 'Overpaid By' : viewingSummary.balance === 0 ? 'Status' : 'Balance Due'}
+                </span>
+                <span className={`text-2xl font-black ${viewingSummary.balance < 0 ? 'text-emerald-600' : viewingSummary.balance === 0 ? 'text-slate-500' : 'text-rose-600'}`}>
+                   {viewingSummary.balance === 0 ? 'Settled' : formatLKR(Math.abs(viewingSummary.balance))}
+                </span>
               </div>
             </div>
           )}

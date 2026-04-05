@@ -3,6 +3,7 @@ export interface Participant {
   id: string;
   name: string;
   email?: string;
+  contributedAmount?: number;
 }
 
 export interface BillItem {
@@ -32,4 +33,5 @@ export interface UserSummary {
     isShared: boolean;
   }[];
   totalAmount: number;
+  balance: number;
 }

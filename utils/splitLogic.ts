@@ -33,10 +33,14 @@ export const calculateSummaries = (bill: Bill): UserSummary[] => {
       }
     });
 
+    const contributed = participant.contributedAmount || 0;
+    const finalTotal = roundToTwo(totalAmount);
+    
     return {
       participant,
       assignedItems,
-      totalAmount: roundToTwo(totalAmount)
+      totalAmount: finalTotal,
+      balance: roundToTwo(finalTotal - contributed)
     };
   });
 };

@@ -14,23 +14,38 @@ interface SummaryPanelProps {
 export const SummaryPanel: React.FC<SummaryPanelProps> = ({ bill, onViewReport, onSendEmail }) => {
   const summaries = calculateSummaries(bill);
   const total = getBillTotal(bill.items);
+  const totalContributed = bill.participants.reduce((acc, p) => acc + (p.contributedAmount || 0), 0);
+  const remainingTotal = Math.max(0, total - totalContributed);
 
   return (
     <div className="space-y-6">
-      <div className="bg-primary-50 dark:bg-primary-950/20 p-6 rounded-2xl border border-primary-100 dark:border-primary-900/50">
-        <div className="flex justify-between items-center">
+      <div className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-950/40 dark:to-primary-900/20 p-6 rounded-3xl border border-primary-200/50 dark:border-primary-800/50 shadow-sm">
+        <div className="flex justify-between items-start mb-6">
           <div>
-            <p className="text-sm font-medium text-primary-600 dark:text-primary-400 mb-1 uppercase tracking-wider">Total Bill Amount</p>
-            <h2 className="text-4xl font-extrabold text-primary-700 dark:text-primary-300">
+            <p className="text-xs font-bold text-primary-600 dark:text-primary-400 mb-1 uppercase tracking-widest">Total Bill Amount</p>
+            <h2 className="text-4xl font-black text-primary-800 dark:text-primary-300 tracking-tight">
               {formatLKR(total)}
             </h2>
           </div>
           <div className="text-right">
-             <p className="text-xs text-slate-500 dark:text-slate-400">Average per person</p>
-             <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">
-               {bill.participants.length > 0 ? formatLKR(total / bill.participants.length) : formatLKR(0)}
+             <p className="text-xs font-bold text-primary-600/70 dark:text-primary-400/70 uppercase tracking-widest mb-1">Total Paid</p>
+             <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+               {formatLKR(totalContributed)}
              </p>
           </div>
+        </div>
+        
+        <div className="pt-4 border-t border-primary-200/50 dark:border-primary-800/50 flex justify-between items-center">
+           <div>
+             <p className="text-xs font-bold text-primary-600/70 dark:text-primary-400/70 uppercase tracking-widest mb-0.5">Remaining Balance</p>
+             <p className="text-lg font-bold text-rose-600 dark:text-rose-400">{formatLKR(remainingTotal)}</p>
+           </div>
+           <div className="text-right">
+             <p className="text-xs font-bold text-primary-600/70 dark:text-primary-400/70 uppercase tracking-widest mb-0.5">Avg/Person</p>
+             <p className="text-lg font-bold text-primary-700 dark:text-primary-300">
+               {bill.participants.length > 0 ? formatLKR(total / bill.participants.length) : formatLKR(0)}
+             </p>
+           </div>
         </div>
       </div>
 
@@ -54,8 +69,25 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({ bill, onViewReport, 
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-right">
-                    <p className="text-xs text-slate-400 uppercase font-bold">Owes</p>
-                    <p className="text-xl font-bold text-slate-800 dark:text-slate-200">{formatLKR(summary.totalAmount)}</p>
+                    {summary.balance < 0 ? (
+                      <div>
+                        <p className="text-xs text-emerald-600 uppercase font-bold tracking-wider">Overpaid</p>
+                        <p className="text-xl font-black text-emerald-600">{formatLKR(Math.abs(summary.balance))}</p>
+                      </div>
+                    ) : summary.balance === 0 ? (
+                      <div>
+                        <p className="text-xs text-slate-400 uppercase font-bold tracking-wider">Settled</p>
+                        <p className="text-xl font-black text-slate-400">-</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-xs text-rose-500 uppercase font-bold tracking-wider">Owes</p>
+                        <p className="text-xl font-black text-rose-600">{formatLKR(summary.balance)}</p>
+                      </div>
+                    )}
+                    {(summary.participant.contributedAmount || 0) > 0 && (
+                      <p className="text-[10px] font-medium text-slate-400 mt-0.5">Share: {formatLKR(summary.totalAmount)}</p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" onClick={() => onViewReport(summary)}>Report</Button>
