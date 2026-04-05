@@ -31,6 +31,7 @@ const App: React.FC = () => {
   const [viewingSummary, setViewingSummary] = useState<UserSummary | null>(null);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [emailStatus, setEmailStatus] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
   const [newParticipant, setNewParticipant] = useState({ name: '', email: '', contributedAmount: '' });
@@ -279,44 +280,97 @@ const App: React.FC = () => {
       const doc = new jsPDF();
       const summaries = calculateSummaries(activeBill);
       const totalAmount = activeBill.items.reduce((sum, item) => sum + item.total, 0);
+      const totalContributed = activeBill.participants.reduce((sum, p) => sum + (p.contributedAmount || 0), 0);
+      const remainingTotal = Math.max(0, totalAmount - totalContributed);
       
-      doc.setFontSize(22);
-      doc.setTextColor(14, 165, 233);
-      doc.text('Bill Keeper – LKR', 14, 20);
+      // Top Banner (Indigo)
+      doc.setFillColor(99, 102, 241);
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setFontSize(24);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Bill Summary Report', 14, 20);
       
       doc.setFontSize(10);
-      doc.setTextColor(100);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(224, 231, 255); // Indigo 100
       doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 28);
       
+      // Bill Details Header
       doc.setFontSize(14);
-      doc.setTextColor(40);
-      doc.text(`Bill: ${activeBill.title || 'Untitled Bill'}`, 14, 40);
-      doc.text(`Date: ${activeBill.date}`, 14, 48);
+      doc.setTextColor(30, 41, 59); // Slate 800
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Title: ${activeBill.title || 'Untitled Bill'}`, 14, 52);
+      doc.setFontSize(11);
+      doc.setTextColor(100, 116, 139); // Slate 500
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Date: ${activeBill.date}`, 14, 59);
       
-      doc.setFontSize(16);
-      doc.text(`Total Amount: ${formatLKR(totalAmount)}`, 14, 58);
+      // Summary Blocks (Total, Paid, Remaining)
+      doc.setDrawColor(226, 232, 240); // Slate 200 borders
+      
+      // Box 1: Total
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(14, 65, 56, 22, 2, 2, 'FD');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text('TOTAL BILL', 18, 72);
+      doc.setFontSize(12);
+      doc.setTextColor(99, 102, 241);
+      doc.setFont('helvetica', 'bold');
+      doc.text(formatLKR(totalAmount), 18, 81);
+      
+      // Box 2: Paid
+      doc.roundedRect(77, 65, 56, 22, 2, 2, 'FD');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.setFont('helvetica', 'normal');
+      doc.text('TOTAL PAID', 81, 72);
+      doc.setFontSize(12);
+      doc.setTextColor(16, 185, 129); // Emerald 500
+      doc.setFont('helvetica', 'bold');
+      doc.text(formatLKR(totalContributed), 81, 81);
+      
+      // Box 3: Remaining
+      doc.roundedRect(140, 65, 56, 22, 2, 2, 'FD');
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.setFont('helvetica', 'normal');
+      doc.text('REMAINING', 144, 72);
+      doc.setFontSize(12);
+      doc.setTextColor(244, 63, 94); // Rose 500
+      doc.setFont('helvetica', 'bold');
+      doc.text(formatLKR(remainingTotal), 144, 81);
       
       doc.setFontSize(12);
-      doc.text('Summary of Split:', 14, 70);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Participant Contributions:', 14, 102);
       
       const getStatusText = (balance: number) => {
         if (balance < 0) return `Overpaid ${formatLKR(Math.abs(balance))}`;
         if (balance === 0) return 'Settled';
         return `Owes ${formatLKR(balance)}`;
       };
+      
       const summaryRows = summaries.map(s => [s.participant.name, formatLKR(s.totalAmount), formatLKR(s.participant.contributedAmount || 0), getStatusText(s.balance)]);
       
       autoTable(doc, { 
-        startY: 75, 
-        head: [['Name', 'Share', 'Contributed', 'Status/Balance']], 
+        startY: 108, 
+        head: [['Name', 'Share', 'Contributed', 'Status']], 
         body: summaryRows, 
         theme: 'grid', 
-        headStyles: { fillColor: [2, 132, 199] }, 
+        headStyles: { fillColor: [99, 102, 241], fontStyle: 'bold' },
+        styles: { textColor: [51, 65, 85], font: 'helvetica' },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
         margin: { horizontal: 14 } 
       });
       
       const finalY = (doc as any).lastAutoTable.finalY + 15;
-      doc.text('Detailed Items:', 14, finalY);
+      doc.setFontSize(12);
+      doc.setTextColor(30, 41, 59);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Line Items Details:', 14, finalY);
       
       const itemRows = activeBill.items.map(item => [
         item.name, 
@@ -328,14 +382,16 @@ const App: React.FC = () => {
       
       autoTable(doc, { 
         startY: finalY + 5, 
-        head: [['Item', 'Qty', 'Unit Price', 'Assigned To', 'Total']], 
+        head: [['Item Description', 'Qty', 'Unit Price', 'Assigned', 'Total']], 
         body: itemRows, 
         theme: 'striped', 
-        headStyles: { fillColor: [71, 85, 105] }, 
+        headStyles: { fillColor: [100, 116, 139] }, 
+        styles: { textColor: [51, 65, 85] },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
         margin: { horizontal: 14 } 
       });
       
-      doc.save(`Bill_${activeBill.title || 'Export'}_${activeBill.date}.pdf`);
+      doc.save(`Invoice_${activeBill.title || 'Export'}_${activeBill.date}.pdf`);
     } catch (error: any) {
       alert(`PDF Generation failed:\n${error.message}`);
     } finally { 
@@ -344,14 +400,14 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
       {/* Sidebar */}
-      <aside className="w-full md:w-80 h-auto md:h-full flex-shrink-0">
-        <BillList bills={bills} activeBillId={activeBillId} onSelectBill={setActiveBillId} onNewBill={handleCreateBill} />
+      <aside className={`transition-all duration-300 h-auto md:h-full flex-shrink-0 z-20 ${isSidebarOpen ? 'w-full md:w-80' : 'w-full md:w-20'}`}>
+        <BillList bills={bills} activeBillId={activeBillId} onSelectBill={setActiveBillId} onNewBill={handleCreateBill} isExpanded={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
       </aside>
 
       {/* Main Area */}
-      <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 transition-colors">
+      <main className="flex-1 overflow-y-auto transition-colors relative flex flex-col">
         <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 px-8 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
           <div>
             <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
@@ -386,7 +442,7 @@ const App: React.FC = () => {
         </header>
 
         {activeBill ? (
-          <div className="p-8 max-w-7xl mx-auto space-y-8">
+          <div className="p-8 max-w-7xl mx-auto space-y-8 flex-1 w-full">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 {/* Participants List */}
@@ -492,7 +548,7 @@ const App: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center p-10">
+          <div className="flex flex-col items-center justify-center text-center p-10 flex-1 w-full">
             <div className="w-20 h-20 bg-primary-100 dark:bg-primary-950/30 text-primary-600 rounded-full flex items-center justify-center mb-6">
                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
             </div>
@@ -641,11 +697,15 @@ const App: React.FC = () => {
 
         {/* Status Toast */}
         {emailStatus && (
-          <div className={`fixed bottom-8 right-8 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-10 duration-300 ${ emailStatus.type === 'success' ? 'bg-emerald-600 text-white' : emailStatus.type === 'info' ? 'bg-primary-600 text-white' : 'bg-red-600 text-white' }`}>
+          <div className={`fixed bottom-8 right-8 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-10 duration-300 z-50 ${ emailStatus.type === 'success' ? 'bg-emerald-600 text-white' : emailStatus.type === 'info' ? 'bg-primary-600 text-white' : 'bg-red-600 text-white' }`}>
             <span className="font-medium">{emailStatus.message}</span>
             <button onClick={() => setEmailStatus(null)} className="p-1 hover:bg-white/20 rounded-full transition-colors"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
           </div>
         )}
+
+        <footer className="mt-auto border-t border-slate-200/60 dark:border-slate-800/60 py-6 text-center text-sm font-medium text-slate-400 dark:text-slate-500 tracking-wide w-full flex-shrink-0">
+          © 2026 Bill Keeper by Dinindu Kongahawatte, All rights reserved.
+        </footer>
       </main>
     </div>
   );
