@@ -351,37 +351,37 @@ const App: React.FC = () => {
       </aside>
 
       {/* Main Area */}
-      <main className="flex-1 overflow-y-auto bg-white dark:bg-slate-900 transition-colors">
-        <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 transition-colors">
+        <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 px-8 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               {activeBill ? (
                 <input 
                   type="text" 
                   value={activeBill.title || ''} 
                   onChange={(e) => handleUpdateBill({...activeBill, title: e.target.value})} 
-                  className="bg-transparent border-none focus:ring-0 p-0 hover:bg-slate-50 dark:hover:bg-slate-800 rounded px-1 transition-colors" 
-                  placeholder="Bill Title" 
+                  className="bg-transparent outline-none border-none focus:ring-0 p-0 focus:bg-slate-100 hover:bg-slate-100 dark:focus:bg-slate-800 dark:hover:bg-slate-800 rounded px-2 transition-colors w-full sm:w-auto" 
+                  placeholder="Untitled Bill..." 
                 />
               ) : 'Select a Bill'}
             </h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 font-medium px-2 mt-1">
               {activeBill ? ( 
                 <input 
                   type="date" 
                   value={activeBill.date} 
                   onChange={(e) => handleUpdateBill({...activeBill, date: e.target.value})} 
-                  className="bg-transparent border-none focus:ring-0 p-0 text-slate-500 text-xs uppercase font-bold tracking-widest cursor-pointer" 
+                  className="bg-transparent outline-none border-none focus:ring-0 p-0 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-sm cursor-pointer transition-colors" 
                 /> 
               ) : 'Create your first bill to start'}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => setIsDarkMode(!isDarkMode)}>
               {isDarkMode ? ( <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fillRule="evenodd" clipRule="evenodd"></path></svg> ) : ( <svg className="w-5 h-5 text-slate-500" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg> )}
             </Button>
             {activeBill && ( <Button variant="outline" size="sm" onClick={handleExportPDF} isLoading={isExportingPDF}>Export PDF</Button> )}
-            {activeBill && ( <Button variant="danger" size="sm" onClick={() => handleDeleteBill(activeBill.id)}>Delete Bill</Button> )}
+            {activeBill && ( <Button variant="danger" size="sm" onClick={() => handleDeleteBill(activeBill.id)}>Delete</Button> )}
           </div>
         </header>
 
@@ -504,20 +504,20 @@ const App: React.FC = () => {
 
         {/* Modal: Add Participant */}
         <Modal isOpen={isAddParticipantOpen} onClose={() => setIsAddParticipantOpen(false)} title="Add Participant">
-          <form onSubmit={handleAddParticipantSubmit} className="space-y-4">
+          <form onSubmit={handleAddParticipantSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
-              <input autoFocus type="text" required value={newParticipant.name} onChange={e => setNewParticipant({...newParticipant, name: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="John Doe" />
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Name</label>
+              <input autoFocus type="text" required value={newParticipant.name} onChange={e => setNewParticipant({...newParticipant, name: e.target.value})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" placeholder="John Doe" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email (Optional)</label>
-              <input type="email" value={newParticipant.email} onChange={e => setNewParticipant({...newParticipant, email: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="john@example.com" />
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email (Optional)</label>
+              <input type="email" value={newParticipant.email} onChange={e => setNewParticipant({...newParticipant, email: e.target.value})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" placeholder="john@example.com" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contributed Amount (Already paid)</label>
-              <input type="number" step="0.01" min="0" value={newParticipant.contributedAmount} onChange={e => setNewParticipant({...newParticipant, contributedAmount: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" placeholder="0.00" />
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Contributed Amount (Already paid)</label>
+              <input type="number" step="0.01" min="0" value={newParticipant.contributedAmount} onChange={e => setNewParticipant({...newParticipant, contributedAmount: e.target.value})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" placeholder="0.00" />
             </div>
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-5 border-t border-slate-100 dark:border-slate-800">
               <Button type="button" variant="secondary" onClick={() => setIsAddParticipantOpen(false)}>Cancel</Button>
               <Button type="submit">Add Participant</Button>
             </div>
@@ -526,22 +526,22 @@ const App: React.FC = () => {
 
         {/* Modal: Edit Participant */}
         <Modal isOpen={!!editingParticipant} onClose={() => setEditingParticipant(null)} title="Edit Participant">
-          <form onSubmit={handleEditParticipantSubmit} className="space-y-4">
+          <form onSubmit={handleEditParticipantSubmit} className="space-y-5">
             {editingParticipant && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Name</label>
-                  <input autoFocus type="text" required value={editingParticipant.name} onChange={e => setEditingParticipant({...editingParticipant, name: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Name</label>
+                  <input autoFocus type="text" required value={editingParticipant.name} onChange={e => setEditingParticipant({...editingParticipant, name: e.target.value})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email (Optional)</label>
-                  <input type="email" value={editingParticipant.email || ''} onChange={e => setEditingParticipant({...editingParticipant, email: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email (Optional)</label>
+                  <input type="email" value={editingParticipant.email || ''} onChange={e => setEditingParticipant({...editingParticipant, email: e.target.value})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contributed Amount (Already paid)</label>
-                  <input type="number" step="0.01" min="0" value={editingParticipant.contributedAmount || ''} onChange={e => setEditingParticipant({...editingParticipant, contributedAmount: parseFloat(e.target.value) || 0})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 outline-none transition-shadow" />
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Contributed Amount (Already paid)</label>
+                  <input type="number" step="0.01" min="0" value={editingParticipant.contributedAmount || ''} onChange={e => setEditingParticipant({...editingParticipant, contributedAmount: parseFloat(e.target.value) || 0})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" />
                 </div>
-                <div className="flex justify-end gap-3 pt-4">
+                <div className="flex justify-end gap-3 pt-5 border-t border-slate-100 dark:border-slate-800">
                   <Button type="button" variant="secondary" onClick={() => setEditingParticipant(null)}>Cancel</Button>
                   <Button type="submit">Save Changes</Button>
                 </div>
@@ -552,22 +552,22 @@ const App: React.FC = () => {
 
         {/* Modal: Add Item */}
         <Modal isOpen={isAddItemOpen} onClose={() => setIsAddItemOpen(false)} title="Add Bill Item">
-          <form onSubmit={handleAddItemSubmit} className="space-y-4">
+          <form onSubmit={handleAddItemSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Item Name</label>
-              <input autoFocus type="text" required value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2" placeholder="Lunch / Grocery / Taxi" />
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Item Name</label>
+              <input autoFocus type="text" required value={newItem.name} onChange={e => setNewItem({...newItem, name: e.target.value})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" placeholder="Lunch / Grocery / Taxi" />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Unit Price (LKR)</label>
-                <input type="number" step="0.01" required value={newItem.price} onChange={e => setNewItem({...newItem, price: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2" placeholder="0.00" />
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit Price (LKR)</label>
+                <input type="number" step="0.01" required value={newItem.price} onChange={e => setNewItem({...newItem, price: e.target.value})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" placeholder="0.00" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Quantity</label>
-                <input type="number" min="1" required value={newItem.quantity} onChange={e => setNewItem({...newItem, quantity: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2" />
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Quantity</label>
+                <input type="number" min="1" required value={newItem.quantity} onChange={e => setNewItem({...newItem, quantity: e.target.value})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" />
               </div>
             </div>
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-5 border-t border-slate-100 dark:border-slate-800">
               <Button type="button" variant="secondary" onClick={() => setIsAddItemOpen(false)}>Cancel</Button>
               <Button type="submit">Add Item</Button>
             </div>
@@ -576,24 +576,24 @@ const App: React.FC = () => {
 
         {/* Modal: Edit Item */}
         <Modal isOpen={!!editingItem} onClose={() => setEditingItem(null)} title="Edit Item Details">
-          <form onSubmit={handleEditItemSubmit} className="space-y-4">
+          <form onSubmit={handleEditItemSubmit} className="space-y-5">
             {editingItem && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Item Name</label>
-                  <input autoFocus type="text" required value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2" />
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Item Name</label>
+                  <input autoFocus type="text" required value={editingItem.name} onChange={e => setEditingItem({...editingItem, name: e.target.value})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Unit Price (LKR)</label>
-                    <input type="number" step="0.01" required value={editingItem.unitPrice} onChange={e => setEditingItem({...editingItem, unitPrice: parseFloat(e.target.value) || 0})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unit Price (LKR)</label>
+                    <input type="number" step="0.01" required value={editingItem.unitPrice} onChange={e => setEditingItem({...editingItem, unitPrice: parseFloat(e.target.value) || 0})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Quantity</label>
-                    <input type="number" min="1" required value={editingItem.quantity} onChange={e => setEditingItem({...editingItem, quantity: parseInt(e.target.value) || 1})} className="w-full bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Quantity</label>
+                    <input type="number" min="1" required value={editingItem.quantity} onChange={e => setEditingItem({...editingItem, quantity: parseInt(e.target.value) || 1})} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all shadow-sm text-sm" />
                   </div>
                 </div>
-                <div className="flex justify-end gap-3 pt-4">
+                <div className="flex justify-end gap-3 pt-5 border-t border-slate-100 dark:border-slate-800">
                   <Button type="button" variant="secondary" onClick={() => setEditingItem(null)}>Cancel</Button>
                   <Button type="submit">Update Item</Button>
                 </div>

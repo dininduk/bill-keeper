@@ -19,33 +19,19 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({ bill, onViewReport, 
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-950/40 dark:to-primary-900/20 p-6 rounded-3xl border border-primary-200/50 dark:border-primary-800/50 shadow-sm">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <p className="text-xs font-bold text-primary-600 dark:text-primary-400 mb-1 uppercase tracking-widest">Total Bill Amount</p>
-            <h2 className="text-4xl font-black text-primary-800 dark:text-primary-300 tracking-tight">
-              {formatLKR(total)}
-            </h2>
-          </div>
-          <div className="text-right">
-             <p className="text-xs font-bold text-primary-600/70 dark:text-primary-400/70 uppercase tracking-widest mb-1">Total Paid</p>
-             <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-               {formatLKR(totalContributed)}
-             </p>
-          </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="col-span-2 bg-gradient-to-br from-primary-600 to-indigo-700 p-6 rounded-2xl shadow-md text-white border border-primary-500/30">
+          <p className="text-primary-100 text-sm font-bold uppercase tracking-wider mb-1">Total Bill Amount</p>
+          <h2 className="text-4xl font-black tracking-tight">{formatLKR(total)}</h2>
+          <p className="text-primary-200 text-sm mt-3 font-medium">Avg/Person: {bill.participants.length > 0 ? formatLKR(total / bill.participants.length) : formatLKR(0)}</p>
         </div>
-        
-        <div className="pt-4 border-t border-primary-200/50 dark:border-primary-800/50 flex justify-between items-center">
-           <div>
-             <p className="text-xs font-bold text-primary-600/70 dark:text-primary-400/70 uppercase tracking-widest mb-0.5">Remaining Balance</p>
-             <p className="text-lg font-bold text-rose-600 dark:text-rose-400">{formatLKR(remainingTotal)}</p>
-           </div>
-           <div className="text-right">
-             <p className="text-xs font-bold text-primary-600/70 dark:text-primary-400/70 uppercase tracking-widest mb-0.5">Avg/Person</p>
-             <p className="text-lg font-bold text-primary-700 dark:text-primary-300">
-               {bill.participants.length > 0 ? formatLKR(total / bill.participants.length) : formatLKR(0)}
-             </p>
-           </div>
+        <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+          <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wide mb-1">Total Paid</p>
+          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatLKR(totalContributed)}</p>
+        </div>
+        <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+          <p className="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wide mb-1">Remaining</p>
+          <p className="text-2xl font-black text-rose-600 dark:text-rose-400">{formatLKR(remainingTotal)}</p>
         </div>
       </div>
 
