@@ -223,7 +223,13 @@ const App: React.FC = () => {
   const handleSendReportViaClient = (summary: UserSummary) => {
     const subject = encodeURIComponent(`Bill Split for ${activeBill?.title || 'Bill'}`);
     const itemsText = summary.assignedItems.map(i => `${i.itemName}${i.isShared ? ' (Shared)' : ''}: ${formatLKR(i.amount)}`).join('\n');
-    const body = encodeURIComponent(`Hello ${summary.participant.name},\n\nHere is your split for ${activeBill?.title || 'the bill'} on ${activeBill?.date}:\n\n${itemsText}\n\nTotal Payable: ${formatLKR(summary.totalAmount)}\n\nSent via Bill Keeper LKR`);
+    
+    const statusText = summary.balance < 0 ? `Overpaid by ${formatLKR(Math.abs(summary.balance))}` : summary.balance === 0 ? 'Settled' : `Owes ${formatLKR(summary.balance)}`;
+    const billTotal = activeBill ? activeBill.items.reduce((s, i) => s + i.total, 0) : 0;
+    const billContributed = activeBill ? activeBill.participants.reduce((s, p) => s + (p.contributedAmount || 0), 0) : 0;
+    const billRemaining = Math.max(0, billTotal - billContributed);
+
+    const body = encodeURIComponent(`Hello ${summary.participant.name},\n\nHere is your split for ${activeBill?.title || 'the bill'} on ${activeBill?.date}:\n\n${itemsText}\n\nYour Share: ${formatLKR(summary.totalAmount)}\nContributed: ${formatLKR(summary.participant.contributedAmount || 0)}\nStatus: ${statusText}\n\n--- Bill Summary ---\nTotal Bill: ${formatLKR(billTotal)}\nTotal Contributed: ${formatLKR(billContributed)}\nRemaining Balance: ${formatLKR(billRemaining)}\n\nSent via Bill Keeper LKR`);
     window.location.href = `mailto:${summary.participant.email}?subject=${subject}&body=${body}`;
   };
 
@@ -231,10 +237,20 @@ const App: React.FC = () => {
      if (!summary.participant.email) return;
      setEmailStatus({ message: "Sending email...", type: 'info' });
      try {
+        const billTotal = activeBill ? activeBill.items.reduce((sum, item) => sum + item.total, 0) : 0;
+        const billContributed = activeBill ? activeBill.participants.reduce((sum, p) => sum + (p.contributedAmount || 0), 0) : 0;
+
         const res = await fetch('/api/send-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ report: summary, billDate: activeBill?.date, billTitle: activeBill?.title })
+          body: JSON.stringify({ 
+            report: summary, 
+            billDate: activeBill?.date, 
+            billTitle: activeBill?.title,
+            billTotal,
+            billContributed,
+            billRemaining: Math.max(0, billTotal - billContributed)
+          })
         });
         
         if (res.status === 404) {
