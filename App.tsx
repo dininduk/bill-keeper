@@ -311,35 +311,38 @@ const App: React.FC = () => {
       doc.setDrawColor(226, 232, 240); // Slate 200 borders
       
       // Box 1: Total
-      doc.setFillColor(248, 250, 252);
+      doc.setFillColor(248, 250, 252); // Slate 50 (Very Light Gray)
       doc.roundedRect(14, 65, 56, 22, 2, 2, 'FD');
       doc.setFontSize(9);
-      doc.setTextColor(100, 116, 139);
+      doc.setTextColor(100, 116, 139); // Medium contrast for label
+      doc.setFont('helvetica', 'normal');
       doc.text('TOTAL BILL', 18, 72);
       doc.setFontSize(12);
-      doc.setTextColor(99, 102, 241);
+      doc.setTextColor(17, 24, 39); // Very Dark Gray for high contrast
       doc.setFont('helvetica', 'bold');
       doc.text(formatLKR(totalAmount), 18, 81);
       
       // Box 2: Paid
+      doc.setFillColor(248, 250, 252); // Enforce background reset
       doc.roundedRect(77, 65, 56, 22, 2, 2, 'FD');
       doc.setFontSize(9);
       doc.setTextColor(100, 116, 139);
       doc.setFont('helvetica', 'normal');
       doc.text('TOTAL PAID', 81, 72);
       doc.setFontSize(12);
-      doc.setTextColor(16, 185, 129); // Emerald 500
+      doc.setTextColor(17, 24, 39); // Very Dark Gray for high contrast
       doc.setFont('helvetica', 'bold');
       doc.text(formatLKR(totalContributed), 81, 81);
       
       // Box 3: Remaining
+      doc.setFillColor(248, 250, 252); // Enforce background reset
       doc.roundedRect(140, 65, 56, 22, 2, 2, 'FD');
       doc.setFontSize(9);
       doc.setTextColor(100, 116, 139);
       doc.setFont('helvetica', 'normal');
       doc.text('REMAINING', 144, 72);
       doc.setFontSize(12);
-      doc.setTextColor(244, 63, 94); // Rose 500
+      doc.setTextColor(17, 24, 39); // Very Dark Gray for high contrast
       doc.setFont('helvetica', 'bold');
       doc.text(formatLKR(remainingTotal), 144, 81);
       
