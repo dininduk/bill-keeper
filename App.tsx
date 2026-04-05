@@ -360,7 +360,7 @@ const App: React.FC = () => {
         head: [['Name', 'Share', 'Contributed', 'Status']], 
         body: summaryRows, 
         theme: 'grid', 
-        headStyles: { fillColor: [99, 102, 241], fontStyle: 'bold' },
+        headStyles: { fillColor: [99, 102, 241], textColor: [255, 255, 255], fontStyle: 'bold' },
         styles: { textColor: [51, 65, 85], font: 'helvetica' },
         alternateRowStyles: { fillColor: [248, 250, 252] },
         margin: { horizontal: 14 } 
@@ -385,7 +385,7 @@ const App: React.FC = () => {
         head: [['Item Description', 'Qty', 'Unit Price', 'Assigned', 'Total']], 
         body: itemRows, 
         theme: 'striped', 
-        headStyles: { fillColor: [100, 116, 139] }, 
+        headStyles: { fillColor: [100, 116, 139], textColor: [255, 255, 255], fontStyle: 'bold' }, 
         styles: { textColor: [51, 65, 85] },
         alternateRowStyles: { fillColor: [248, 250, 252] },
         margin: { horizontal: 14 } 
